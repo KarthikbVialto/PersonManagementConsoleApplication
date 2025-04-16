@@ -113,7 +113,7 @@ public class PersonCommands
     public void Delete()
     {
         int pfindingId = int.Parse(AnsiConsole.Ask<string>("Enter Id of Person to delete: "));
-        var personToDelete = dbContext.Persons.FirstOrDefault(x => x.Id == pfindingId);
+        var personToDelete = dbContext.Persons.Include(a=>a.Address).Include(d=>d.DateOfBirth).FirstOrDefault(x => x.Id == pfindingId);
         if (personToDelete == null)
         {
             Console.WriteLine("Invalid Id!  Person Not Found");
@@ -152,14 +152,12 @@ public class PersonCommands
         Console.ReadLine();
 
     }
-    //Error at line 168
     public void GetPerson()
     {
-        int id = int.Parse(AnsiConsole.Ask<string>("Enter id of person: "));
-        var personById = dbContext.Persons.FirstOrDefault(x => x.Id == id);
-        if (personById == null)
+        int id = int.Parse(AnsiConsole.Ask<string>("Enter id to find: "));
+        var person = dbContext.Persons.Include(a=>a.Address).Include(d=>d.DateOfBirth).FirstOrDefault(x => x.Id == id);
+        if(person == null)
         {
-            Console.WriteLine("Person Not Found");
             return;
         }
         var table = new Table();
@@ -168,17 +166,17 @@ public class PersonCommands
         table.AddColumn("Address");
         table.AddColumn("Date of Birth");
         table.AddRow
-        (
-            $"{personById.Id}",
-            $"{personById.FirstName} {personById.LastName}",
-            $"{personById.Address.Country}, {personById.Address.State}, {personById.Address.City}, {personById.Address.Pincode}",
-            $"{personById.DateOfBirth.Date}/{personById.DateOfBirth.Month}/{personById.DateOfBirth.Year}"
-        );
+            (
+            $"{person.Id}",
+            $"{person.FirstName} {person.LastName}",
+            $"{person.Address.Country}, {person.Address.State}, {person.Address.City}, {person.Address.Pincode}",
+            $"{person.DateOfBirth.Date}/{person.DateOfBirth.Month}/{person.DateOfBirth.Year}"
+            );
         table.Border(TableBorder.Square);
         table.Expand();
-
+        AnsiConsole.Write(table);
         Console.ReadLine();
-    }
+    }    
     
 }
 
