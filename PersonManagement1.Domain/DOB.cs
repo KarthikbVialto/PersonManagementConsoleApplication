@@ -13,5 +13,7 @@ namespace PersonManagement1.Domain
         public int Month { get; set; }
         public int Year { get; set; }
 
+        public Person Person { get; set; }
+        
     }
 }

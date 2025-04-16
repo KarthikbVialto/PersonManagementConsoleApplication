@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonManagement1.Data;
 
@@ -10,9 +11,11 @@ using PersonManagement1.Data;
 namespace PersonManagement1.Data.Migrations
 {
     [DbContext(typeof(PersonManagementDbContext))]
-    partial class PersonManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250416090130_DeleteFix2")]
+    partial class DeleteFix2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,6 +39,9 @@ namespace PersonManagement1.Data.Migrations
                     b.Property<string>("Country")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PersonId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Pincode")
                         .HasColumnType("int");
@@ -61,6 +67,9 @@ namespace PersonManagement1.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Month")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PersonId")
                         .HasColumnType("int");
 
                     b.Property<int>("Year")

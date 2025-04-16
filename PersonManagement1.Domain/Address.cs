@@ -13,5 +13,8 @@ namespace PersonManagement1.Domain
         public string State { get; set; }
         public string City { get; set; }
         public int Pincode { get; set; }
+
+        //Navigation Properties
+        public Person Person { get; set; }
     }
 }

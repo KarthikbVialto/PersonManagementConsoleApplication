@@ -42,7 +42,7 @@ public class Program
         builder.Services.AddDbContext<PersonManagementDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("PersonManagementDB")));
 
-        builder.Services.AddSingleton<PersonCommands>();
+        builder.Services.AddScoped<PersonCommands>();
         var app = builder.Build();
         app.AddCommand("addperson",() =>
         {
@@ -94,7 +94,8 @@ public class PersonCommands
             {
                 Country = AnsiConsole.Ask<string>("Enter Country Name: "),
                 State = AnsiConsole.Ask<string>("Enter State Name: "),
-                City = AnsiConsole.Ask<string>("Enter City Name: ")
+                City = AnsiConsole.Ask<string>("Enter City Name: "),
+                Pincode = int.Parse(AnsiConsole.Ask<string>("Enter PinCode: "))
             },
             DateOfBirth = new DOB
             {
@@ -107,7 +108,7 @@ public class PersonCommands
         dbContext.Persons.Add(person);
         dbContext.SaveChanges();
         AnsiConsole.WriteLine("Person Added Successfully");
-        Console.ReadLine();
+        //Console.ReadLine();
     
     }
     public void Delete()
@@ -119,10 +120,12 @@ public class PersonCommands
             Console.WriteLine("Invalid Id!  Person Not Found");
             return;
         }
+        dbContext.Addresses.Remove(personToDelete.Address);
+        dbContext.DateOfBirty.Remove(personToDelete.DateOfBirth);
         dbContext.Persons.Remove(personToDelete);
         dbContext.SaveChanges();
         Console.WriteLine($"{personToDelete.FirstName} {personToDelete.LastName} has been deleted successfully");
-        Console.ReadLine();
+        //Console.ReadLine();
     }
 
     public void GetAllPerson()
@@ -149,7 +152,7 @@ public class PersonCommands
         table.Border(TableBorder.Square);
         table.Expand();
         AnsiConsole.Write(table);
-        Console.ReadLine();
+        //Console.ReadLine();
 
     }
     public void GetPerson()
@@ -175,7 +178,7 @@ public class PersonCommands
         table.Border(TableBorder.Square);
         table.Expand();
         AnsiConsole.Write(table);
-        Console.ReadLine();
+       // Console.ReadLine();
     }    
     
 }

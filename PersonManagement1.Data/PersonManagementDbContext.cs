@@ -27,5 +27,21 @@ namespace PersonManagement1.Data
                 optionsBuilder.UseSqlServer(ConnectionString);
             }
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Person>()
+                    .HasOne(p => p.Address)
+                    .WithOne(a => a.Person)
+                    .HasForeignKey<Person>(p => p.AddressId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Person>()
+                    .HasOne(p => p.DateOfBirth)
+                    .WithOne(d => d.Person)
+                    .HasForeignKey<Person>(p => p.DobId)
+                    .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

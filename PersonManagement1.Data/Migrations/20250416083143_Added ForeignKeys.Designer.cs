@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PersonManagement1.Data;
 
@@ -10,9 +11,11 @@ using PersonManagement1.Data;
 namespace PersonManagement1.Data.Migrations
 {
     [DbContext(typeof(PersonManagementDbContext))]
-    partial class PersonManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250416083143_Added ForeignKeys")]
+    partial class AddedForeignKeys
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
