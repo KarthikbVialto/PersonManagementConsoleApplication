@@ -3,6 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using PersonManagement1.Data;
 using PersonManagement1.Domain;
 using Spectre.Console;
+using Cocona;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;
 
 public class Program
 {
@@ -28,127 +32,154 @@ public class Program
 
         AnsiConsole.Write(grid);
     }
-    public static Person GetPerson()
+    
+    static void Main(string[] args)
     {
-        return new Person
+       
+
+        var builder = CoconaApp.CreateBuilder(args);
+        builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
+        builder.Services.AddDbContext<PersonManagementDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("PersonManagementDB")));
+
+        builder.Services.AddSingleton<PersonCommands>();
+        var app = builder.Build();
+        app.AddCommand("addperson",() =>
         {
-            FirstName = AnsiConsole.Ask<string>("Enter First Name: "),
-            LastName = AnsiConsole.Ask<string>("Enter Last Name: "),
+            var personCommands = app.Services.GetRequiredService<PersonCommands>();
+            personCommands.Add();
+        });
+        app.AddCommand("deleteperson", () =>
+        {
+            var personCommands = app.Services.GetRequiredService<PersonCommands>();
+            personCommands.Delete();
+        });
+
+        app.AddCommand("getallpersons", () =>
+        {
+            var personCommands = app.Services.GetRequiredService<PersonCommands>();
+            personCommands.GetAllPerson();
+        });
+
+        //Not Working
+        app.AddCommand("getperson", () =>
+        {
+            var personCommands = app.Services.GetRequiredService<PersonCommands>();
+            personCommands.GetPerson();
+        });
+
+        app.Run();
+        
+
+    }
+}
+
+public class PersonCommands
+{
+    private readonly PersonManagementDbContext dbContext;
+
+    public PersonCommands(PersonManagementDbContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
+    
+    public void Add()
+    {
+        
+        var person = new Person
+        {
+            FirstName = AnsiConsole.Ask<string>("Enter First Name of Person: "),
+            LastName  = AnsiConsole.Ask<string>("Enter Last Name of Person: "),
             Address = new Address
             {
-                Country = AnsiConsole.Ask<string>("Enter Country:"),
-                State = AnsiConsole.Ask<string>("Enter State: "),
-                City = AnsiConsole.Ask<string>("Enter City: "),
-                Pincode = int.Parse(AnsiConsole.Ask<string>("Enter PinCode: "))
+                Country = AnsiConsole.Ask<string>("Enter Country Name: "),
+                State = AnsiConsole.Ask<string>("Enter State Name: "),
+                City = AnsiConsole.Ask<string>("Enter City Name: ")
             },
             DateOfBirth = new DOB
             {
                 Date = int.Parse(AnsiConsole.Ask<string>("Enter Date: ")),
                 Month = int.Parse(AnsiConsole.Ask<string>("Enter Month: ")),
-                Year = int.Parse(AnsiConsole.Ask<string>("Enter Year: "))
+                Year = int.Parse(AnsiConsole.Ask<string>("Enter Year: ")),
             }
+            
         };
+        dbContext.Persons.Add(person);
+        dbContext.SaveChanges();
+        AnsiConsole.WriteLine("Person Added Successfully");
+        Console.ReadLine();
+    
     }
-
-    static void Main(string[] args)
+    public void Delete()
     {
-        using (var dbContext = new PersonManagementDbContext(new DbContextOptions<PersonManagementDbContext>()))
+        int pfindingId = int.Parse(AnsiConsole.Ask<string>("Enter Id of Person to delete: "));
+        var personToDelete = dbContext.Persons.FirstOrDefault(x => x.Id == pfindingId);
+        if (personToDelete == null)
         {
-            #region previous code
-            //var person = new Person
-            //{
-            //    FirstName = "karthik",
-            //    LastName = "balabathula",
-            //    Address = new Address
-            //    {
-            //        City = "Hyderabad",
-            //        State = "Telangana",
-            //        Country = "India"
-            //    },
-            //    DateOfBirth = new DOB
-            //    {
-            //        Date = 23,
-            //        Month = 11,
-            //        Year = 2004
-            //    }
-            //};
-            //dbContext.Persons.Add(person);
-            //dbContext.SaveChanges();
-            //Console.WriteLine("Operation Successfull");
-            #endregion
-
-            //ConsoleApplication user input code
-            bool isExit = true;
-            while (isExit) 
-            {
-                AnsiConsole.Clear();
-                RenderLayout();
-                int input = int.Parse(AnsiConsole.Ask<string>("Please select an option from above list"));
-
-                switch (input) {
-                    case 1:
-                        AnsiConsole.Clear();
-                        dbContext.Persons.Add(GetPerson());
-                        dbContext.SaveChanges();
-                        AnsiConsole.WriteLine("Person Added Successfully");
-                        AnsiConsole.WriteLine("Enter any key to go back to mehu");
-                        Console.ReadLine();
-                        break;
-                    case 2:
-                        AnsiConsole.Clear();
-                        int id = int.Parse(AnsiConsole.Ask<string>("Enter Id of Person to delete: "));
-                        var person = dbContext.Persons.FirstOrDefault(x => x.Id == id);
-                        if(person == null)
-                        {
-                            AnsiConsole.WriteLine("Invalid Id or person Not found in Database!");
-                            break;
-                        }
-                        dbContext.Persons.Remove(person);
-                        AnsiConsole.WriteLine($"{person.FirstName}{person.LastName} has been removed successfully from Database");
-                        AnsiConsole.WriteLine("Enter a key to go back to menu");
-                        Console.ReadLine();
-                        break;
-                    case 3:
-                        AnsiConsole.Clear();
-                        var personList = dbContext.Persons.Include(a=>a.Address)
-                                                          .Include(d=>d.DateOfBirth)
-                                                          .ToList();
-
-                        foreach (var ind in personList)
-                        {
-                            AnsiConsole.WriteLine($"Name:{ind.FirstName} {ind.LastName}");
-                            AnsiConsole.WriteLine($"Address:{ind.Address.Country}, {ind.Address.State}, {ind.Address.City}, {ind.Address.Pincode}");
-                            AnsiConsole.WriteLine($"Date of Birth: {ind.DateOfBirth.Date}/{ind.DateOfBirth.Month}/{ind.DateOfBirth.Year}");
-                        }
-                        AnsiConsole.WriteLine("Enter a key to go back to menu");
-                        Console.ReadLine();
-                        break;
-                    case 4:
-                        AnsiConsole.Clear();
-                        int pfindingId = int.Parse(AnsiConsole.Ask<string>("Enter id of Person to View: "));
-                        var personById = dbContext.Persons.Include(p=>p.Address)
-                                                          .Include(d=>d.DateOfBirth)
-                                                          .FirstOrDefault(x => x.Id == pfindingId);
-                        if(personById == null)
-                        {
-                            AnsiConsole.WriteLine("Person Not Found in Database!");
-                            break;
-                        }
-                        AnsiConsole.WriteLine($"Name:{personById.FirstName} {personById.LastName}");
-                        AnsiConsole.WriteLine($"Address:{personById.Address.Country}, {personById.Address.State}, {personById.Address.City}, {personById.Address.Pincode}");
-                        AnsiConsole.WriteLine($"Date of Birth: {personById.DateOfBirth.Date}/{personById.DateOfBirth.Month}/{personById.DateOfBirth.Year}");
-                        AnsiConsole.WriteLine("Enter a key to go back to menu");
-                        Console.ReadLine();
-                        break;
-
-                    case 5:
-                        isExit = false;
-                        break;     
-                }
-            }
+            Console.WriteLine("Invalid Id!  Person Not Found");
+            return;
         }
+        dbContext.Persons.Remove(personToDelete);
+        dbContext.SaveChanges();
+        Console.WriteLine($"{personToDelete.FirstName} {personToDelete.LastName} has been deleted successfully");
+        Console.ReadLine();
     }
-}
 
+    public void GetAllPerson()
+    {
+        var allPersons = dbContext.Persons.Include(a => a.Address).Include(d => d.DateOfBirth)
+                                          .ToList();
+        var table = new Table();
+        table.AddColumn("Id");
+        table.AddColumn("Name");
+        table.AddColumn("Address");
+        table.AddColumn("Date of Birth");
+        
+        foreach(var ind in allPersons)
+        {
+            table.AddRow
+             (
+             $"{ind.Id}",
+             $"{ind.FirstName} {ind.LastName}",
+             $"{ind.Address.Country}, {ind.Address.State}, {ind.Address.City}, {ind.Address.Pincode}",
+             $"{ind.DateOfBirth.Date}/{ind.DateOfBirth.Month}/{ind.DateOfBirth.Year}"
+             );
+            table.AddEmptyRow();
+        }
+        table.Border(TableBorder.Square);
+        table.Expand();
+        AnsiConsole.Write(table);
+        Console.ReadLine();
+
+    }
+    //Error at line 168
+    public void GetPerson()
+    {
+        int id = int.Parse(AnsiConsole.Ask<string>("Enter id of person: "));
+        var personById = dbContext.Persons.FirstOrDefault(x => x.Id == id);
+        if (personById == null)
+        {
+            Console.WriteLine("Person Not Found");
+            return;
+        }
+        var table = new Table();
+        table.AddColumn("Id");
+        table.AddColumn("Name");
+        table.AddColumn("Address");
+        table.AddColumn("Date of Birth");
+        table.AddRow
+        (
+            $"{personById.Id}",
+            $"{personById.FirstName} {personById.LastName}",
+            $"{personById.Address.Country}, {personById.Address.State}, {personById.Address.City}, {personById.Address.Pincode}",
+            $"{personById.DateOfBirth.Date}/{personById.DateOfBirth.Month}/{personById.DateOfBirth.Year}"
+        );
+        table.Border(TableBorder.Square);
+        table.Expand();
+
+        Console.ReadLine();
+    }
+    
+}
 
 
