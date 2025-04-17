@@ -31,16 +31,16 @@ namespace PersonManagement1.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Person>()
-                    .HasOne(p => p.Address)
-                    .WithOne(a => a.Person)
-                    .HasForeignKey<Person>(p => p.AddressId)
+            modelBuilder.Entity<Address>()
+                    .HasOne(p => p.Person)
+                    .WithOne(a => a.Address)
+                    .HasForeignKey<Address>(p => p.PersonID)
                     .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Person>()
-                    .HasOne(p => p.DateOfBirth)
-                    .WithOne(d => d.Person)
-                    .HasForeignKey<Person>(p => p.DobId)
+            modelBuilder.Entity<DOB>()
+                    .HasOne(p => p.Person)
+                    .WithOne(d => d.DateOfBirth)
+                    .HasForeignKey<DOB>(p => p.PersonId)
                     .OnDelete(DeleteBehavior.Cascade);
         }
     }

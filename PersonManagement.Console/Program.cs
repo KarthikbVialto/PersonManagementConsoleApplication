@@ -120,8 +120,6 @@ public class PersonCommands
             Console.WriteLine("Invalid Id!  Person Not Found");
             return;
         }
-        dbContext.Addresses.Remove(personToDelete.Address);
-        dbContext.DateOfBirty.Remove(personToDelete.DateOfBirth);
         dbContext.Persons.Remove(personToDelete);
         dbContext.SaveChanges();
         Console.WriteLine($"{personToDelete.FirstName} {personToDelete.LastName} has been deleted successfully");

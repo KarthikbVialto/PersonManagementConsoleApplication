@@ -15,6 +15,7 @@ namespace PersonManagement1.Domain
         public int Pincode { get; set; }
 
         //Navigation Properties
+        public int PersonID { get; set; }
         public Person Person { get; set; }
     }
 }

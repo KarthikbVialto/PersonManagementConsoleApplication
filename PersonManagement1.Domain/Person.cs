@@ -12,9 +12,10 @@ namespace PersonManagement1.Domain
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        public int AddressId { get; set; }
+        
         public Address Address { get; set; }
-        public int DobId { get; set; }
+        
+        
         public DOB DateOfBirth { get; set; }
 
 
